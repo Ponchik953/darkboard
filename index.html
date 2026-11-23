@@ -41,7 +41,7 @@ main{flex:1;position:relative;overflow:hidden;touch-action:none;background-color
 #hist h3{margin:0;padding:14px;font-size:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}#histList{overflow:auto;padding:8px 14px;flex:1}
 #histList div{padding:7px 0;border-bottom:1px solid var(--rl);font-size:13px}#histList small{color:var(--muted);display:block}#histList b{font-weight:600}
 @media(max-width:650px){.room,.status{display:none}.panel{top:auto;bottom:55px;left:10px;right:10px;flex-wrap:wrap}.hint{display:none}#ctx{top:auto;bottom:110px;left:10px;right:10px;transform:none;max-width:none}}
-#modal,#lock{position:fixed;inset:0;background:#000b;z-index:20;display:none;place-items:center}
+#modal,#lock,#profile,#pwModal{position:fixed;inset:0;background:#000b;z-index:20;display:none;place-items:center}
 .mbox{width:min(560px,92vw);max-height:80vh;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
 .mh{display:flex;justify-content:space-between;align-items:center}#bList{overflow:auto;flex:1;min-height:60px}
 .brow{display:flex;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rl)}.brow span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.brow button{padding:5px 9px}
@@ -58,9 +58,18 @@ body[data-theme=graphite]{--bg:#1a1a1a;--panel:#252525;--panel2:#2f2f2f;--line:#
 #themes .mh{margin-bottom:10px}#themes small.n{color:var(--muted);display:block;margin-top:8px;font-size:12px}
 #tList{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tcard{border-radius:12px;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:4px;outline:2px solid transparent;border:1px solid #ffffff22}
 .tcard:hover{outline-color:var(--accent)}.tcard.tcur{outline:2px solid}.tcard small{opacity:.7}.tcard .dots{display:flex;gap:6px;margin-bottom:6px}.tcard .dots i{width:14px;height:14px;border-radius:50%}.tcard:last-child{grid-column:1/-1}
+.mav{width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px}
+.cur span img{width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:4px;object-fit:cover}
+#histList .lav{width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px}#histList em{color:var(--muted);font-style:normal}
+.pf{overflow:auto}.pf label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}.pf hr{border:0;border-top:1px solid var(--line);width:100%;margin:4px 0}
+.pf input[type=text],#pwModal input,.prow input{background:var(--inp);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:8px 10px;font:inherit}
+.pfrow{display:flex;gap:14px;align-items:center}.pfav{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--panel2);border:1px solid var(--line)}
+.pfbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pfcols{display:flex;gap:18px}.pfcols input[type=color]{width:56px;height:34px;border:0;background:none;padding:0}
+.pf .chk{flex-direction:row;align-items:center;gap:8px;color:var(--text)}.pfmsg{font-size:12px;color:var(--muted)}.pfprev{font-size:13px;color:var(--muted)}
+.pill{padding:1px 8px;border-radius:8px;color:#111;font-size:11px}.prow{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--rl)}.prow span{flex:1}.pnote{color:var(--muted);font-size:13px;margin:6px 0}
 </style></head>
 <body>
-<header><div class="brand">dark<span>board</span></div><div class="room" id="roomLabel"></div><button id="rename">Переименовать</button><div class="spacer"></div><button id="boardsBtn" style="display:none">📁 Мои доски</button><button class="primary" id="loginBtn">Войти через Google</button><button id="me" title="Имя (нажмите, чтобы изменить или выйти из аккаунта)"></button><span class="room" id="peers" title="Участники в этой комнате">👥 1</span><span class="status" id="status">● Локальная доска</span><button id="themeBtn" title="Темы оформления">🎨 Темы</button><button id="gridBtn" title="Сетка с привязкой">▦ Сетка</button><button id="rulBtn" title="Линейки">📏 Линейки</button><button id="histBtn" title="История изменений">🕘 История</button><button id="undo" title="Отменить">↶</button><button id="redo" title="Повторить">↷</button><button id="export">Экспорт PNG</button><button class="primary" id="share">Ссылка</button></header>
+<header><div class="brand">dark<span>board</span></div><div class="room" id="roomLabel"></div><button id="rename">Переименовать</button><div class="spacer"></div><button id="boardsBtn" style="display:none">📁 Мои доски</button><button class="primary" id="loginBtn">Войти через Google</button><button id="pwBtn" style="display:none" title="Войти по email и паролю">✉</button><button id="me" title="Имя (нажмите, чтобы изменить или выйти из аккаунта)"></button><span class="room" id="peers" title="Участники в этой комнате">👥 1</span><span class="status" id="status">● Локальная доска</span><button id="themeBtn" title="Темы оформления">🎨 Темы</button><button id="gridBtn" title="Сетка с привязкой">▦ Сетка</button><button id="rulBtn" title="Линейки">📏 Линейки</button><button id="histBtn" title="История изменений">🕘 История</button><button id="undo" title="Отменить">↶</button><button id="redo" title="Повторить">↷</button><button id="export">Экспорт PNG</button><button class="primary" id="share">Ссылка</button></header>
 <div class="layout"><aside>
 <button class="tool active" data-tool="select" title="Выбор (V)">↖</button>
 <button class="tool" data-tool="draw" title="Карандаш (P)">✎</button>
@@ -88,6 +97,19 @@ body[data-theme=graphite]{--bg:#1a1a1a;--panel:#252525;--panel2:#2f2f2f;--line:#
 <div class="hint">Shift — добавить к выделению · Ctrl+G — группа · Ctrl+V — вставить фото · Колесо — масштаб · Пробел + перетаскивание — двигать доску</div><div class="zoom"><button id="minus">−</button><button id="zoomVal">100%</button><button id="plus">+</button><button id="fit">⌖</button></div><div id="drop">Отпустите изображение, чтобы добавить на доску</div>
 <div id="hist"><h3>История изменений <button id="histX">✕</button></h3><div id="histList"></div></div></main></div>
 <div id="themes"><div class="mh"><b>🎨 Темы оформления</b><button id="tClose">✕</button></div><div id="tList"></div><small class="n">Тема видна только вам. После входа она сохраняется в аккаунте и подхватывается на других устройствах.</small></div>
+<div id="profile"><div class="mbox pf"><div class="mh"><b>👤 Профиль и персонализация</b><button id="pfClose">✕</button></div>
+<div class="pfrow"><img id="pfAv" class="pfav" alt=""><div class="pfbtns"><button id="pfUp">Загрузить аватар</button><button id="pfDel">Убрать</button><input id="pfFile" type="file" accept="image/*" hidden></div></div>
+<label>Отображаемое имя<input id="pfName" type="text" maxlength="24"></label>
+<label>Ник (латиница, цифры и _ ; от 3 до 20 символов)<input id="pfNick" type="text" maxlength="20" placeholder="например, ponchik"></label>
+<div class="pfcols"><label>Цвет ника<input id="pfNc" type="color"></label><label>Цвет курсора<input id="pfCc" type="color"></label></div>
+<div class="pfprev">Так вас видят: <span id="pfPrev"></span></div>
+<b>Что видят другие</b>
+<label class="chk"><input id="pfShAv" type="checkbox"> Показывать мой аватар</label>
+<label class="chk"><input id="pfShNick" type="checkbox"> Показывать мой ник рядом с именем</label>
+<label class="chk"><input id="pfShCur" type="checkbox"> Показывать мой курсор другим участникам</label>
+<div class="pfbtns"><button class="primary" id="pfSave">Сохранить профиль</button><span id="pfMsg" class="pfmsg"></span></div>
+<hr><b>Аккаунт и способы входа</b><div id="pfAcc"></div></div></div>
+<div id="pwModal"><div class="mbox"><div class="mh"><b>✉ Вход по email и паролю</b><button id="pwClose">✕</button></div><input id="pwEmail" type="email" placeholder="Email"><input id="pwPass" type="password" placeholder="Пароль"><div class="pfbtns"><button class="primary" id="pwGo">Войти</button><span id="pwMsg" class="pfmsg"></span></div><div class="pnote">Работает, если вы раньше привязали email и пароль в профиле (после входа через Google).</div></div></div>
 <div id="modal"><div class="mbox"><div class="mh"><b>📁 Мои доски</b><button id="mClose">✕</button></div><div id="bList"></div><div class="mnew"><input id="bName" placeholder="Название новой доски" maxlength="60"><button class="primary" id="bNew">Создать</button></div><a href="?" class="mlink">Продолжить без входа (локальная доска)</a></div></div>
 <div id="lock"><div class="mbox"><b id="lockMsg">Эта доска хранится в облаке. Войдите через Google, чтобы открыть её.</b><button class="primary" id="lockLogin">Войти через Google</button><a href="?" class="mlink">← К локальной доске</a></div></div>
 <script type="module">
@@ -110,15 +132,21 @@ const EM={select:'↖',draw:'✏️',marker:'🖍️',erase:'🧽',laser:'🔴',
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rot2=(x,y,d)=>{const a=d*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return[x*c-y*s,x*s+y*c]};
-let cloud=null,user=null,cloudTheme=null,theme='dark',cloudState=null,cloudLog=null,cloudRen=null,tool='select',zoom=1,pan={x:viewport.clientWidth/2,y:viewport.clientHeight/2},objects=[],paths=[],lasers=[],sel=[],cropObj=null,space=false,gridOn=false,rulersOn=false,history=[],future=[],ticking=false,saveT=0,lastCur=null,lastSend=0,cs=false;
+let cloud=null,user=null,gname='',gphoto='',cloudProfile=null,cloudAcc=null,cloudTheme=null,theme='dark',cloudState=null,cloudLog=null,cloudRen=null,tool='select',zoom=1,pan={x:viewport.clientWidth/2,y:viewport.clientHeight/2},objects=[],paths=[],lasers=[],sel=[],cropObj=null,space=false,gridOn=false,rulersOn=false,history=[],future=[],ticking=false,saveT=0,lastCur=null,lastSend=0,cs=false;
 const els=new Map(),peers=new Map(),rl={};
 const boardId=new URLSearchParams(location.search).get('board'),room=new URLSearchParams(location.search).get('room')||'demo-room',key='darkboard:'+room;
 const channel=!boardId&&'BroadcastChannel'in window?new BroadcastChannel(key):null,send=m=>channel&&channel.postMessage(m);
-const me={id:uid(),n:lsGet('darkboard:name')||'Гость '+(100+Math.floor(Math.random()*900))};me.c=`hsl(${[...me.id].reduce((a,c)=>a+c.charCodeAt(0),0)*47%360} 80% 66%)`;
+const PALC=['#8b7cff','#ff6b6b','#ffb347','#51cf66','#4dabf7','#f472b6','#2dd4bf','#facc15'];
+let cid=lsGet('darkboard:cid');if(!cid){cid=uid();lsSet('darkboard:cid',cid)}
+const defC=PALC[[...cid].reduce((a,c)=>a+c.charCodeAt(0),0)%8],guest=lsGet('darkboard:name')||'Гость '+(100+Math.floor(Math.random()*900));
+let prof={nick:'',name:'',nc:'',cc:'',av:'',shAv:true,shNick:true,shCur:true};try{Object.assign(prof,JSON.parse(lsGet('darkboard:profile')||'{}'))}catch(e){}
+const me={id:uid(),n:'',c:'',nc:'',nick:'',av:''},avatarSrc=()=>prof.av||gphoto,el=(t,txt,cls)=>{const x=document.createElement(t);if(txt)x.textContent=txt;if(cls)x.className=cls;return x};
+function applyProfile(){me.n=prof.name||gname||guest;me.c=prof.cc||defC;me.nc=prof.nc||me.c;me.nick=prof.shNick?prof.nick:'';me.av=prof.shAv?avatarSrc():'';meUI()}
+const curMsg=(p,full)=>({t:'cur',id:me.id,n:me.n,c:me.c,k:me.nick,x:prof.shCur&&p?p.x:null,y:prof.shCur&&p?p.y:null,...(full?{a:me.av}:{})});
 const sn=v=>gridOn?Math.round(v/GRID)*GRID:v,status=t=>$('status').textContent=t;
 $('roomLabel').textContent=boardId?'Доска: загрузка…':'Комната: '+room;
-function meUI(){$('me').textContent='● '+me.n;$('me').style.color=me.c}meUI();
-$('me').onclick=()=>{if(cloud&&user){if(confirm('Выйти из аккаунта?'))cloud.signOut();return}const n=prompt('Ваше имя',me.n);if(n&&n.trim()){me.n=n.trim().slice(0,24);lsSet('darkboard:name',me.n);meUI()}};
+function meUI(){const b=$('me');b.textContent='';const a=avatarSrc();if(a){const im=new Image();im.referrerPolicy='no-referrer';im.src=a;im.className='mav';b.append(im)}else b.append(document.createTextNode('● '));b.append(document.createTextNode(me.n));b.style.color=me.nc}applyProfile();
+$('me').onclick=()=>openProfile();
 // ---------- история для отмены (картинки хранятся по ссылкам, чтобы не раздувать память)
 const srcRef=new Map(),srcById=new Map();
 const pack=()=>JSON.stringify({objects,paths},(k,v)=>{if(k==='src'&&typeof v==='string'&&v.length>200){let r=srcRef.get(v);if(!r){r='@'+srcById.size;srcRef.set(v,r);srcById.set(r,v)}return r}return v});
@@ -128,9 +156,9 @@ function undo(){if(!history.length)return;future.push(pack());load(unpack(histor
 function redo(){if(!future.length)return;history.push(pack());load(unpack(future.pop()));commit('Повтор действия')}
 // ---------- журнал изменений
 let logs=[];if(!boardId)try{logs=JSON.parse(lsGet(key+':log')||'[]')}catch(e){}
-function log(x){const t=Date.now(),l=logs[logs.length-1];if(l&&l.id===me.id&&l.x===x&&t-l.t<2000)return;const e={id:me.id,n:me.n,c:me.c,x,t};if(cloudLog)return cloudLog(e);logs.push(e);trimLog();send({t:'log',e})}
+function log(x){const t=Date.now(),l=logs[logs.length-1];if(l&&l.id===me.id&&l.x===x&&t-l.t<2000)return;const e={id:me.id,n:me.n,c:me.nc,x,t};if(me.nick)e.k=me.nick;if(me.av)e.a=me.av;if(cloudLog)return cloudLog(e);logs.push(e);trimLog();send({t:'log',e})}
 function trimLog(){if(logs.length>200)logs=logs.slice(-200);renderLog()}
-function renderLog(){const L=$('histList');if($('hist').style.display!=='flex')return;L.innerHTML='';logs.slice().reverse().forEach(e=>{const d=document.createElement('div'),b=document.createElement('b'),s=document.createElement('small');b.textContent=e.n;b.style.color=e.c;s.textContent=new Date(e.t).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit',second:'2-digit'});d.append(b,document.createTextNode(': '+e.x),s);L.append(d)})}
+function renderLog(){const L=$('histList');if($('hist').style.display!=='flex')return;L.innerHTML='';logs.slice().reverse().forEach(e=>{const d=document.createElement('div'),b=document.createElement('b'),s=document.createElement('small');if(e.a){const im=new Image();im.referrerPolicy='no-referrer';im.src=e.a;im.className='lav';d.append(im)}b.textContent=e.n;b.style.color=e.c;d.append(b);if(e.k){const k=document.createElement('em');k.textContent=' @'+e.k;d.append(k)}d.append(document.createTextNode(': '+e.x));s.textContent=new Date(e.t).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit',second:'2-digit'});d.append(s);L.append(d)})}
 // ---------- сохранение и рассылка
 function commit(text){if(text)log(text);send({t:'state',d:{objects,paths}});status(boardId?'● Сохраняю в облако…':'● Сохраняю…');clearTimeout(saveT);saveT=setTimeout(save,boardId?700:300)}
 function save(){saveT=0;if(boardId){cloud&&cloud.save();return}const ok=lsSet(key,JSON.stringify({objects,paths}));lsSet(key+':log',JSON.stringify(logs));status(ok?'● Автосохранено '+new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}):'⚠ Не удалось сохранить: мало места в браузере')}
@@ -221,7 +249,7 @@ if(cropObj)finishCrop();
 const add0=e.shiftKey,base=add0?sel.slice():[],mq=$('marq'),vr=viewport.getBoundingClientRect();if(!add0){sel=[];drawSel()}
 track(ev=>{const q=point(ev),x0=Math.min(p.x,q.x),x1=Math.max(p.x,q.x),y0=Math.min(p.y,q.y),y1=Math.max(p.y,q.y);mq.style.display='block';mq.style.left=Math.min(e.clientX,ev.clientX)-vr.left+'px';mq.style.top=Math.min(e.clientY,ev.clientY)-vr.top+'px';mq.style.width=Math.abs(ev.clientX-e.clientX)+'px';mq.style.height=Math.abs(ev.clientY-e.clientY)+'px';
 const hit=objects.filter(o=>!o.locked&&o.x<x1&&o.x+o.w>x0&&o.y<y1&&o.y+o.h>y0),gs=new Set(hit.map(o=>o.g).filter(Boolean));sel=[...new Set([...base,...objects.filter(o=>hit.includes(o)||(o.g&&gs.has(o.g)))])];drawSel()},()=>{mq.style.display='none'})});
-viewport.addEventListener('pointermove',e=>{const p=point(e);lastCur=p;const t=performance.now();if(t-lastSend>40){lastSend=t;send({t:'cur',id:me.id,n:me.n,c:me.c,x:p.x,y:p.y})}});
+viewport.addEventListener('pointermove',e=>{const p=point(e);lastCur=p;const t=performance.now();if(t-lastSend>40){lastSend=t;send(curMsg(p))}});
 viewport.addEventListener('wheel',e=>{e.preventDefault();const old=zoom;zoom=clamp(zoom*(e.deltaY<0?1.1:.9),.2,3);const r=viewport.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;pan.x=mx-(mx-pan.x)*zoom/old;pan.y=my-(my-pan.y)*zoom/old;transform()},{passive:false});
 document.addEventListener('keydown',e=>{if(e.target.isContentEditable||['INPUT','TEXTAREA'].includes(e.target.tagName))return;
 if(e.code==='Space'){space=true;e.preventDefault()}
@@ -271,10 +299,39 @@ const a=document.createElement('a');a.download='darkboard.png';a.href=c.toDataUR
 const placeCur=p=>{if(p.x!=null)p.el.style.transform=`translate(${p.x}px,${p.y}px) scale(${1/zoom})`};
 function peersUI(){$('peers').textContent='👥 '+(1+peers.size)}
 function peer(m){let p=peers.get(m.id);if(!p){const el=document.createElement('div');el.className='cur';el.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16"><path d="M1 1l5 13 2-5 5-2z" stroke="#000"/></svg><span></span>';$('curs').append(el);p={el};peers.set(m.id,p);peersUI()}
-p.seen=performance.now();p.x=m.x;p.y=m.y;p.el.querySelector('path').style.fill=m.c;const sp=p.el.querySelector('span');sp.textContent=m.n;sp.style.background=m.c;p.el.style.display=m.x==null?'none':'';placeCur(p)}
-setInterval(()=>{const t=performance.now();peers.forEach((p,id)=>{if(t-p.seen>6000){p.el.remove();peers.delete(id);peersUI()}});send({t:'cur',id:me.id,n:me.n,c:me.c,x:lastCur?lastCur.x:null,y:lastCur?lastCur.y:null})},2000);
+p.seen=performance.now();p.x=m.x;p.y=m.y;p.el.querySelector('path').style.fill=m.c;const sp=p.el.querySelector('span'),lab=m.n+(m.k?' @'+m.k:'');sp.style.background=m.c;if(p.lab!==lab||(m.a!==undefined&&m.a!==p.a)){if(m.a!==undefined)p.a=m.a;p.lab=lab;sp.textContent='';if(p.a){const im=new Image();im.referrerPolicy='no-referrer';im.src=p.a;sp.append(im)}sp.append(document.createTextNode(lab))}p.el.style.display=m.x==null?'none':'';placeCur(p)}
+setInterval(()=>{const t=performance.now();peers.forEach((p,id)=>{if(t-p.seen>6000){p.el.remove();peers.delete(id);peersUI()}});send(curMsg(lastCur,true))},2000);
 if(channel)channel.onmessage=e=>{const m=e.data;if(m.t==='state'){load(m.d);status('● Получено обновление из другой вкладки')}else if(m.t==='cur')peer(m);else if(m.t==='laser')remoteLaser(m);else if(m.t==='log'){logs.push(m.e);trimLog()}};
 else if(!boardId)window.addEventListener('storage',e=>{if(e.key===key&&e.newValue)load(JSON.parse(e.newValue))});
+// ---------- профиль и персонализация
+let draftAv='';
+function pfPreview(){const P=$('pfPrev'),a=draftAv||gphoto,A=$('pfAv');P.textContent='';if(a){const im=new Image();im.referrerPolicy='no-referrer';im.src=a;im.className='mav';P.append(im)}
+ const n=el('b',$('pfName').value.trim()||gname||guest);n.style.color=$('pfNc').value;P.append(n);const k=$('pfNick').value.trim();if(k)P.append(el('em',' @'+k));
+ const c=el('span','курсор','pill');c.style.background=$('pfCc').value;P.append(' · ',c);A.referrerPolicy='no-referrer';A.src=a||'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='}
+function openProfile(){draftAv=prof.av||'';$('pfName').value=prof.name||'';$('pfName').placeholder=gname||guest;$('pfNick').value=prof.nick||'';$('pfNc').value=prof.nc||prof.cc||defC;$('pfCc').value=prof.cc||defC;$('pfShAv').checked=prof.shAv!==false;$('pfShNick').checked=prof.shNick!==false;$('pfShCur').checked=prof.shCur!==false;$('pfMsg').textContent='';$('profile').style.display='grid';pfPreview();renderAcc()}
+['pfName','pfNick','pfNc','pfCc'].forEach(i=>$(i).oninput=pfPreview);
+$('pfUp').onclick=()=>$('pfFile').click();
+$('pfFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),S=96,m=Math.min(im.naturalWidth,im.naturalHeight);c.width=c.height=S;c.getContext('2d').drawImage(im,(im.naturalWidth-m)/2,(im.naturalHeight-m)/2,m,m,0,0,S,S);draftAv=c.toDataURL('image/webp',.82);pfPreview()};im.src=r.result};r.readAsDataURL(f)};
+$('pfDel').onclick=()=>{draftAv='';pfPreview()};
+$('pfSave').onclick=()=>{const nick=$('pfNick').value.trim();if(nick&&!/^[A-Za-z0-9_]{3,20}$/.test(nick)){$('pfMsg').textContent='Ник: только латиница, цифры и _, от 3 до 20 символов';return}
+ Object.assign(prof,{name:$('pfName').value.trim().slice(0,24),nick,nc:$('pfNc').value,cc:$('pfCc').value,av:draftAv,shAv:$('pfShAv').checked,shNick:$('pfShNick').checked,shCur:$('pfShCur').checked});
+ lsSet('darkboard:profile',JSON.stringify(prof));applyProfile();send(curMsg(lastCur,true));
+ if(cloudProfile)cloudProfile(prof).then(()=>$('pfMsg').textContent='✓ Сохранено в аккаунте').catch(()=>$('pfMsg').textContent='Сохранено в этом браузере, в облако не получилось');
+ else $('pfMsg').textContent='✓ Сохранено в этом браузере. Войдите, чтобы профиль был и на других устройствах'};
+$('pfClose').onclick=()=>$('profile').style.display='none';
+function renderAcc(){const A=$('pfAcc');A.textContent='';
+ if(!user||!cloudAcc){A.append(el('div','Вы не вошли. Профиль хранится только в этом браузере. Войдите через Google (кнопка в шапке), чтобы он сохранялся в аккаунте и на других устройствах.','pnote'));return}
+ A.append(el('div','Почта: '+(user.email||'—'),'pnote'));
+ const ids=user.providerData.map(x=>x.providerId),many=ids.length>1;
+ [['google.com','Google'],['password','Email и пароль']].forEach(([id,name])=>{const row=el('div','','prow'),has=ids.includes(id);row.append(el('span',name+' — '+(has?'привязан ✓':'не привязан')));
+  if(has){if(many){const b=el('button','Отвязать');b.onclick=async()=>{if(confirm('Отвязать способ входа «'+name+'»?')&&await cloudAcc.unlink(id))renderAcc()};row.append(b)}}
+  else if(id==='google.com'){const b=el('button','Привязать');b.onclick=async()=>{if(await cloudAcc.link(id))renderAcc()};row.append(b)}
+  else{const pw=el('input');pw.type='password';pw.placeholder='Пароль (от 6 символов)';const b=el('button','Привязать');b.onclick=async()=>{if(await cloudAcc.link(id,pw.value))renderAcc()};row.append(pw,b)}
+  A.append(row)});
+ const bar=el('div','','pfbtns');if(ids.includes('password')){const b=el('button','Сменить пароль (письмо на почту)');b.onclick=()=>cloudAcc.reset();bar.append(b)}
+ const o=el('button','Выйти из аккаунта');o.onclick=()=>cloudAcc.out();bar.append(o);A.append(bar)}
+$('pwBtn').onclick=()=>{$('pwMsg').textContent='';$('pwModal').style.display='grid'};$('pwClose').onclick=()=>$('pwModal').style.display='none';
+$('pwGo').onclick=()=>{if(!cloudAcc){$('pwMsg').textContent='Вход ещё загружается, попробуйте через секунду';return}$('pwMsg').textContent='Входим…';cloudAcc.pwLogin($('pwEmail').value.trim(),$('pwPass').value).then(()=>{$('pwModal').style.display='none'}).catch(e=>{$('pwMsg').textContent=['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'].includes(e.code)?'Неверный email или пароль':'Ошибка: '+e.code})};
 // ---------- темы оформления
 function applyIcons(){const em=THEMES[theme].icons==='emoji';document.querySelectorAll('aside .tool').forEach(b=>{const k=b.dataset.tool||b.id;b.innerHTML=em?(EM[k]||'?'):'<svg class="ic" viewBox="0 0 24 24">'+(IC[k]||'')+'</svg>'})}
 function buildSwatches(){const S=$('sw');S.innerHTML='';THEMES[theme].pal.forEach(c=>{const b=document.createElement('button');b.className='sw';b.style.background=c;b.title=c;b.onclick=()=>{$('color').value=c;colorChanged();cs=false;if(sel.length)commit('Изменён цвет')};S.append(b)})}
@@ -285,19 +342,26 @@ $('tClose').onclick=()=>{$('themes').style.display='none';$('themeBtn').classLis
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#themes,#themeBtn')){$('themes').style.display='none';$('themeBtn').classList.remove('on')}});
 window.addEventListener('resize',transform);
 if(!boardId)try{load(JSON.parse(lsGet(key)||'{"objects":[],"paths":[]}'))}catch(e){load({objects:[],paths:[]})}
-setTheme(lsGet('darkboard:theme')||'dark',false);send({t:'cur',id:me.id,n:me.n,c:me.c,x:null,y:null});
+applyProfile();setTheme(lsGet('darkboard:theme')||'dark',false);send(curMsg(null,true));
 // ---------- облако (Firebase): вход через Google, «Мои доски», синхронизация
 async function initCloud(){
 let A,Au,F;
 try{const b='https://www.gstatic.com/firebasejs/10.14.1/';[A,Au,F]=await Promise.all([import(b+'firebase-app.js'),import(b+'firebase-auth.js'),import(b+'firebase-firestore.js')])}
 catch(e){$('loginBtn').style.display='none';if(boardId){$('lockMsg').textContent='Не удалось загрузить Firebase. Проверьте интернет (возможно, нужен VPN) и обновите страницу.';$('lockLogin').style.display='none';$('lock').style.display='grid'}return}
 const app=A.initializeApp(FIREBASE_CONFIG),auth=Au.getAuth(app),db=F.getFirestore(app),hhmm=()=>new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}),zOf=new Map();
+const accErr=e=>{const m={'auth/requires-recent-login':'Для этого нужно войти заново: выйдите, войдите снова и повторите.','auth/weak-password':'Пароль слишком короткий (минимум 6 символов).','auth/provider-already-linked':'Этот способ входа уже привязан.','auth/credential-already-in-use':'Этот способ входа уже привязан к другому аккаунту.','auth/email-already-in-use':'Эта почта уже используется другим аккаунтом.'};if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')alert(m[e.code]||'Ошибка: '+e.code)};
+cloudAcc={
+ link:async(id,pw)=>{try{const u=auth.currentUser;if(id==='google.com')await Au.linkWithPopup(u,new Au.GoogleAuthProvider());else{if(!pw||pw.length<6){alert('Пароль должен быть не короче 6 символов.');return}await Au.linkWithCredential(u,Au.EmailAuthProvider.credential(u.email,pw))}return true}catch(e){accErr(e)}},
+ unlink:async id=>{try{await Au.unlink(auth.currentUser,id);return true}catch(e){accErr(e)}},
+ reset:()=>Au.sendPasswordResetEmail(auth,auth.currentUser.email).then(()=>alert('Письмо для смены пароля отправлено на '+auth.currentUser.email)).catch(accErr),
+ out:()=>Au.signOut(auth).then(()=>location.reload()),
+ pwLogin:(em,pw)=>Au.signInWithEmailAndPassword(auth,em,pw)};
 const login=()=>Au.signInWithPopup(auth,new Au.GoogleAuthProvider()).catch(e=>{if(e.code==='auth/popup-blocked')Au.signInWithRedirect(auth,new Au.GoogleAuthProvider());else if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')alert('Не удалось войти: '+e.code+'\nЕсли открываешь файл с компьютера (file://), вход не заработает: нужен адрес http(s) или localhost.')});
 $('loginBtn').onclick=$('lockLogin').onclick=login;
 cloud={signOut:()=>Au.signOut(auth).then(()=>location.reload()),save:cloudSave};
 let modalShown=false;
-Au.onAuthStateChanged(auth,u=>{user=u;$('loginBtn').style.display=u?'none':'';$('boardsBtn').style.display=u?'':'none';
- if(u){cloudTheme=k=>F.setDoc(F.doc(db,'users',u.uid),{theme:k},{merge:true}).catch(()=>{});F.getDoc(F.doc(db,'users',u.uid)).then(d=>{if(d.exists()&&d.data().theme)setTheme(d.data().theme,false)}).catch(()=>{});me.n=(u.displayName||'Участник').split(' ')[0].slice(0,24);meUI();$('lock').style.display='none';if(boardId){if(!cloudState)openBoard()}else if(!modalShown){modalShown=true;openBoards()}}
+Au.onAuthStateChanged(auth,u=>{user=u;$('loginBtn').style.display=$('pwBtn').style.display=u?'none':'';$('boardsBtn').style.display=u?'':'none';
+ if(u){cloudTheme=k=>F.setDoc(F.doc(db,'users',u.uid),{theme:k},{merge:true}).catch(()=>{});cloudProfile=pr=>F.setDoc(F.doc(db,'users',u.uid),{profile:pr},{merge:true});F.getDoc(F.doc(db,'users',u.uid)).then(d=>{if(!d.exists())return;const v=d.data();if(v.theme)setTheme(v.theme,false);if(v.profile){Object.assign(prof,v.profile);lsSet('darkboard:profile',JSON.stringify(prof));applyProfile()}}).catch(()=>{});gname=(u.displayName||'Участник').split(' ')[0].slice(0,24);gphoto=u.photoURL||'';applyProfile();$('lock').style.display='none';if(boardId){if(!cloudState)openBoard()}else if(!modalShown){modalShown=true;openBoards()}}
  else if(boardId)$('lock').style.display='grid'});
 // --- открыть облачную доску
 async function openBoard(){
