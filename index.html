@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Darkboard — совместная доска</title>
-<link rel="icon" type="image/png" href="icon.png">
+<link rel="icon" type="image/png" href="favicon.png">
 <style>
 :root{--bg:#101217;--panel:#191d25;--panel2:#222834;--line:#303846;--text:#e8edf5;--muted:#9aa6b7;--accent:#8b7cff;--hdr:#171b22;--canvas:#11151b;--dot:#343b49;--float:#191e27ef;--grid:#ffffff14;--hover:#2b3040;--act:#38335f;--actt:#c9c3ff;--st:#9bd8b0;--inp:#12151b;--rl:#262c38;--chip:#242a35;--pri:#7568e8;--pri2:#867af4;--prit:#fff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px Inter,system-ui,Segoe UI,sans-serif;overflow:hidden}
@@ -116,7 +116,7 @@ body[data-theme=graphite]{--bg:#1a1a1a;--panel:#252525;--panel2:#2f2f2f;--line:#
 (()=>{
 const $=id=>document.getElementById(id);
 // Настройки твоего проекта Firebase (публичные). Если вход не работает — сверь apiKey с тем, что показывает консоль Firebase.
-const FIREBASE_CONFIG={apiKey:"AIzaSyBtaCxnFyeTVN4hIEAxAFtbgJqeOIGMMko",authDomain:"poncheso.firebaseapp.com",projectId:"poncheso",storageBucket:"poncheso.firebasestorage.app",messagingSenderId:"985215443846",appId:"1:985215443846:web:ed5f5e8db6af7f03b70207"};
+const FIREBASE_CONFIG={apiKey:"AIzaSyBtaCxnFyeTVN4hIEAxAFtbgJqeOIGMMko",authDomain:"poncheso.firebaseapp.com",projectId:"poncheso",databaseURL:"https://poncheso-default-rtdb.europe-west1.firebasedatabase.app",storageBucket:"poncheso.firebasestorage.app",messagingSenderId:"985215443846",appId:"1:985215443846:web:ed5f5e8db6af7f03b70207"};
 const viewport=$('viewport'),world=$('world'),board=$('board'),layer=$('drawLayer'),ctx=layer.getContext('2d');
 const GRID=24,LASER=1800,NAMES={image:'изображение',note:'стикер',text:'текст',rect:'прямоугольник',circle:'круг',arrow:'стрелка'},DEF={note:[190,110],text:[200,36],rect:[130,85],circle:[110,110],arrow:[110,50]};
 const H=[[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
@@ -132,10 +132,10 @@ const EM={select:'↖',draw:'✏️',marker:'🖍️',erase:'🧽',laser:'🔴',
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rot2=(x,y,d)=>{const a=d*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return[x*c-y*s,x*s+y*c]};
-let cloud=null,user=null,gname='',gphoto='',cloudProfile=null,cloudAcc=null,cloudTheme=null,theme='dark',cloudState=null,cloudLog=null,cloudRen=null,tool='select',zoom=1,pan={x:viewport.clientWidth/2,y:viewport.clientHeight/2},objects=[],paths=[],lasers=[],sel=[],cropObj=null,space=false,gridOn=false,rulersOn=false,history=[],future=[],ticking=false,saveT=0,lastCur=null,lastSend=0,cs=false;
+let rtSend=null,cloud=null,user=null,gname='',gphoto='',cloudProfile=null,cloudAcc=null,cloudTheme=null,theme='dark',cloudState=null,cloudLog=null,cloudRen=null,tool='select',zoom=1,pan={x:viewport.clientWidth/2,y:viewport.clientHeight/2},objects=[],paths=[],lasers=[],sel=[],cropObj=null,space=false,gridOn=false,rulersOn=false,history=[],future=[],ticking=false,saveT=0,lastCur=null,lastSend=0,cs=false;
 const els=new Map(),peers=new Map(),rl={};
 const boardId=new URLSearchParams(location.search).get('board'),room=new URLSearchParams(location.search).get('room')||'demo-room',key='darkboard:'+room;
-const channel=!boardId&&'BroadcastChannel'in window?new BroadcastChannel(key):null,send=m=>channel&&channel.postMessage(m);
+const channel=!boardId&&'BroadcastChannel'in window?new BroadcastChannel(key):null,send=m=>{channel&&channel.postMessage(m);rtSend&&rtSend(m)};
 const PALC=['#8b7cff','#ff6b6b','#ffb347','#51cf66','#4dabf7','#f472b6','#2dd4bf','#facc15'];
 let cid=lsGet('darkboard:cid');if(!cid){cid=uid();lsSet('darkboard:cid',cid)}
 const defC=PALC[[...cid].reduce((a,c)=>a+c.charCodeAt(0),0)%8],guest=lsGet('darkboard:name')||'Гость '+(100+Math.floor(Math.random()*900));
@@ -243,7 +243,7 @@ if(e.button)return;const p=point(e),c=$('color').value,s=+$('size').value;
 if(tool==='draw'||tool==='marker'){snapshot();const m=tool==='marker',st={id:uid(),kind:m?'marker':'pen',color:c,size:m?s*3:s,alpha:m?.4:1,points:[p]};paths.push(st);renderPaths();track(ev=>{st.points.push(point(ev));renderPaths()},()=>commit(m?'Выделено маркером':'Нарисовано от руки'));return}
 if(tool==='erase'){snapshot();let n=0;const near=(pa,q,r)=>{const P=pa.points;for(let i=0;i<P.length;i++){const a=P[i],b=P[i+1]||a,dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;let t=l?((q.x-a.x)*dx+(q.y-a.y)*dy)/l:0;t=Math.max(0,Math.min(1,t));if(Math.hypot(a.x+t*dx-q.x,a.y+t*dy-q.y)<r+pa.size/2)return true}return false};
 const hit=ev=>{const q=point(ev),r=12/zoom,keep=paths.filter(pa=>!near(pa,q,r));if(keep.length!==paths.length){n+=paths.length-keep.length;paths=keep;renderPaths()}};hit(e);track(hit,()=>{if(n)commit('Стёрто линий: '+n);else history.pop()});return}
-if(tool==='laser'){const L={id:me.id,c,s:Math.max(3,s),pts:[]};let first=true;const addPt=q=>{q.t=performance.now();L.pts.push(q);if(!lasers.includes(L))lasers.push(L);send({t:'laser',id:me.id,c:L.c,s:L.s,x:q.x,y:q.y,n:first});first=false;startTick()};addPt(p);track(ev=>addPt(point(ev)));return}
+if(tool==='laser'){const L={id:me.id,c,s:Math.max(3,s),pts:[]};let first=true;const addPt=q=>{q.t=performance.now();L.pts.push(q);if(!lasers.includes(L))lasers.push(L);send({t:'laser',id:me.id,c:L.c,s:L.s,x:q.x,y:q.y,n:first});first=false;startTick()};addPt(p);track(ev=>addPt(point(ev)),()=>send({t:'laserend'}));return}
 if(['note','text','rect','circle','arrow'].includes(tool)){const b={x:sn(p.x),y:sn(p.y)};if(tool==='note')add({type:'note',...b,text:'Новая заметка',color:'#ffe58a'},1);else if(tool==='text')add({type:'text',...b,text:'Новый текст',color:c},1);else add({type:tool,...b,text:'',color:c},1);setTool('select');return}
 if(cropObj)finishCrop();
 const add0=e.shiftKey,base=add0?sel.slice():[],mq=$('marq'),vr=viewport.getBoundingClientRect();if(!add0){sel=[];drawSel()}
@@ -348,6 +348,7 @@ async function initCloud(){
 let A,Au,F;
 try{const b='https://www.gstatic.com/firebasejs/10.14.1/';[A,Au,F]=await Promise.all([import(b+'firebase-app.js'),import(b+'firebase-auth.js'),import(b+'firebase-firestore.js')])}
 catch(e){$('loginBtn').style.display='none';if(boardId){$('lockMsg').textContent='Не удалось загрузить Firebase. Проверьте интернет (возможно, нужен VPN) и обновите страницу.';$('lockLogin').style.display='none';$('lock').style.display='grid'}return}
+let R=null;try{R=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js')}catch(e){}
 const app=A.initializeApp(FIREBASE_CONFIG),auth=Au.getAuth(app),db=F.getFirestore(app),hhmm=()=>new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}),zOf=new Map();
 const accErr=e=>{const m={'auth/requires-recent-login':'Для этого нужно войти заново: выйдите, войдите снова и повторите.','auth/weak-password':'Пароль слишком короткий (минимум 6 символов).','auth/provider-already-linked':'Этот способ входа уже привязан.','auth/credential-already-in-use':'Этот способ входа уже привязан к другому аккаунту.','auth/email-already-in-use':'Эта почта уже используется другим аккаунтом.'};if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')alert(m[e.code]||'Ошибка: '+e.code)};
 cloudAcc={
@@ -363,6 +364,29 @@ let modalShown=false;
 Au.onAuthStateChanged(auth,u=>{user=u;$('loginBtn').style.display=$('pwBtn').style.display=u?'none':'';$('boardsBtn').style.display=u?'':'none';
  if(u){cloudTheme=k=>F.setDoc(F.doc(db,'users',u.uid),{theme:k},{merge:true}).catch(()=>{});cloudProfile=pr=>F.setDoc(F.doc(db,'users',u.uid),{profile:pr},{merge:true});F.getDoc(F.doc(db,'users',u.uid)).then(d=>{if(!d.exists())return;const v=d.data();if(v.theme)setTheme(v.theme,false);if(v.profile){Object.assign(prof,v.profile);lsSet('darkboard:profile',JSON.stringify(prof));applyProfile()}}).catch(()=>{});gname=(u.displayName||'Участник').split(' ')[0].slice(0,24);gphoto=u.photoURL||'';applyProfile();$('lock').style.display='none';if(boardId){if(!cloudState)openBoard()}else if(!modalShown){modalShown=true;openBoards()}}
  else if(boardId)$('lock').style.display='grid'});
+// --- курсоры и указка других участников через интернет (Realtime Database)
+function initPresence(){
+ let rdb;try{rdb=R&&R.getDatabase(app)}catch(e){console.warn('Realtime Database:',e)}
+ if(!rdb)return;
+ const key=user.uid+'_'+me.id.slice(0,8),pBase=R.ref(rdb,'presence/'+boardId),mine=R.ref(rdb,'presence/'+boardId+'/'+key),lBase=R.ref(rdb,'lasers/'+boardId),las=R.ref(rdb,'lasers/'+boardId+'/'+key);
+ let lastInfo='',lastInfoAt=0,lastCurAt=0,lastLasAt=0,sid=0,hidden=false,conn=false;
+ R.onValue(R.ref(rdb,'.info/connected'),s=>{conn=!!s.val();if(conn){R.onDisconnect(mine).remove();R.onDisconnect(las).remove();lastInfo='';$('peers').title='Участники на этой доске (курсоры работают)'}});
+ setTimeout(()=>{if(!conn){$('peers').title='Курсоры по интернету недоступны: проверьте адрес и правила Realtime Database';console.warn('Realtime Database не подключилась: проверьте databaseURL в начале скрипта и правила базы.')}},10000);
+ rtSend=m=>{
+  if(m.t==='cur'){
+   if(m.a!==undefined){const i={n:m.n,c:m.c,k:m.k||'',a:m.a||''},js=JSON.stringify(i),now=Date.now();if(js!==lastInfo||now-lastInfoAt>30000){lastInfo=js;lastInfoAt=now;R.update(mine,{i,h:now})}else R.update(mine,{h:now})}
+   if(m.x==null){if(!hidden){hidden=true;R.update(mine,{c:null})}}
+   else{hidden=false;const t=performance.now();if(t-lastCurAt>60){lastCurAt=t;R.update(mine,{c:{x:Math.round(m.x),y:Math.round(m.y)}})}}
+  }else if(m.t==='laser'){const t=performance.now();if(m.n)sid=Date.now();else if(t-lastLasAt<40)return;lastLasAt=t;R.set(las,{x:Math.round(m.x),y:Math.round(m.y),c:m.c,s:m.s,sid})}
+  else if(m.t==='laserend')R.remove(las)};
+ const upd=s=>{if(s.key===key)return;const v=s.val()||{},i=v.i||{},c=v.c;peer({id:s.key,n:i.n||'Гость',c:i.c||'#8b7cff',k:i.k||'',a:i.a||'',x:c?c.x:null,y:c?c.y:null})};
+ R.onChildAdded(pBase,upd);R.onChildChanged(pBase,upd);
+ R.onChildRemoved(pBase,s=>{const p=peers.get(s.key);if(p){p.el.remove();peers.delete(s.key);peersUI()}});
+ const lup=s=>{if(s.key===key)return;const v=s.val();if(!v)return;const o=rl[s.key];remoteLaser({id:s.key,c:v.c,s:v.s,x:v.x,y:v.y,n:!o||o.sid!==v.sid});rl[s.key].sid=v.sid};
+ R.onChildAdded(lBase,lup);R.onChildChanged(lBase,lup);
+ addEventListener('pagehide',()=>{R.remove(mine);R.remove(las)});
+ send(curMsg(lastCur,true));
+}
 // --- открыть облачную доску
 async function openBoard(){
  const ref=F.doc(db,'boards',boardId);let snap;
@@ -379,7 +403,7 @@ async function openBoard(){
   if(ch){const z=a=>a.sort((x,y)=>(zOf.get(x.id)||0)-(zOf.get(y.id)||0));load({objects:z([...O.values()]),paths:z([...P.values()])});status('● Получены изменения '+hhmm())}
  },e=>status('⚠ Облако: '+e.code));
  F.onSnapshot(F.query(F.collection(ref,'log'),F.orderBy('t','desc'),F.limit(100)),s=>{logs=s.docs.map(d=>d.data()).reverse();renderLog()},()=>{});
- status('● Подключено к облаку');
+ initPresence();status('● Подключено к облаку');
 }
 // --- сохранить в облако только изменившиеся объекты
 async function cloudSave(){
